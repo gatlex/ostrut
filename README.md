@@ -12,7 +12,7 @@ std::vector<int> v = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 9};
 std::cout << v << std::endl;
 // Outputs: [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 9]
 ```
-(Btw, you can find the examples of this document in [examples/basics.cc](https://./examples/basics.cc).)
+(Btw, you can find the examples of this document in [examples/basics.cc](examples/basics.cc).)
 
 What you gain compared to a simple, manual two-line loop?  Let's consider a more complex structure
 ```c++
