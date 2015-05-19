@@ -12,7 +12,7 @@ std::vector<int> v = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 9};
 std::cout << v << std::endl;
 // Outputs: [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 9]
 ```
-(Btw, you can find the examples of this document in [examples/basics.cc](file://./examples/basics.cc).)
+(Btw, you can find the examples of this document in [examples/basics.cc](https://./examples/basics.cc).)
 
 What you gain compared to a simple, manual two-line loop?  Let's consider a more complex structure
 ```c++
@@ -25,7 +25,7 @@ So, nesting a `std::pair` of a `std::vector<int>` and a `std::map<std::string,st
 std::cout << cpx << std::endl;
 // Outputs: [([1, 2, 3], {"Hello" : [42, 17], "World" : [21]}), ([4, 5, 6], {"Dlrow" : [12], "Olleh" : [24, 71]})]
 ```
-You can see that pairs are displayed by round parentheses, while maps are displayed in Python-manner using braces and colons like `{A : B, C : D}`.  For more on that see [below on special syntax for common containers](#Special-Syntax-for-Various-Standard-Containers).  Also notice that strings are wrapped in double quotes; similarly, characters would be wrapped in single quotes.
+You can see that pairs are displayed by round parentheses, while maps are displayed in Python-manner using braces and colons like `{A : B, C : D}`.  For more on that see [below on special syntax for common containers](#special-syntax).  Also notice that strings are wrapped in double quotes; similarly, characters would be wrapped in single quotes.
 
 
 Usage
@@ -71,8 +71,8 @@ std::cout << m << std::endl;
 ```
 
 
-(Special-Syntax-for-Various-Standard-Containers)
-------------------------------------------------
+Special Syntax for Various Standard Containers<a name="special-syntax" />
+----------------------------------------------
 
 All iterateables can be output by `ostrut` with the syntax `[1, 2, 3, ...]` you already saw.  The only requirement is that the container implement the iterator interface (i.e., `std::begin(c)` and `std::end(c)` must be valid expressions for a const instance of the container,  yielding iterators).  Apart from this generic output, `ostrut` has some specializations for the most common standard library containers (for illustrations parametrized by integers):
 - `std::map` is displayed like `{1 : 2, 2 : 3, ...}`.
@@ -82,7 +82,7 @@ All iterateables can be output by `ostrut` with the syntax `[1, 2, 3, ...]` you 
 For convenience, also pairs and tuples are displayed:
 - `std::pair` is displayed like `(1, 2)`.
 - `std::tuple` is displayed like `(1, 2, 3, 4, 5)`.
-Also for convenience, pointers are dereferenced instead of displaying the raw memory address (supported are C-style, `std::shared_ptr`, `std::unique_ptr`, `std::auto_ptr`, `std::weak_ptr`)
+Also for convenience, pointers are dereferenced instead of displaying the raw memory address (supported are C-style pointers, `std::shared_ptr`, `std::unique_ptr`, `std::auto_ptr`, `std::weak_ptr`)
 
 
 Matryoshka Limit
@@ -100,6 +100,8 @@ std::cout << ostrut::nesting_limit(2) << ostrut::expansion_limit(2) << cpx << st
 ```
 
 As before, switch back to unlimited nesting using `ostrut::nesting_limit(ostrut::infinite)`.
+
+Oh, yeah: `ostrut::matryoshka_limit(n)` is a synomym for `ostrut::nesting_limit(n)` if you find that easier to memorize.
 
 
 Pushing and Popping Settings
