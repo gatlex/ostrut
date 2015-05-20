@@ -25,7 +25,7 @@ So, nesting a `std::pair` of a `std::vector<int>` and a `std::map<std::string,st
 std::cout << cpx << std::endl;
 // Outputs: [([1, 2, 3], {"Hello" : [42, 17], "World" : [21]}), ([4, 5, 6], {"Dlrow" : [12], "Olleh" : [24, 71]})]
 ```
-You can see that pairs are displayed by round parentheses, while maps are displayed in Python-manner using braces and colons like `{A : B, C : D}`.  For more on that see [below on special syntax for common containers](#special-syntax).  Also notice that strings are wrapped in double quotes; similarly, characters would be wrapped in single quotes.
+In this example, you can see that pairs are displayed by round parentheses, while maps are displayed in Python-manner using braces and colons like `{A : B, C : D}`.  For more on that see [below on special syntax for common containers](#special-syntax).  Also notice that strings are wrapped in double quotes; similarly, characters would be wrapped in single quotes.
 
 
 Usage
@@ -79,9 +79,11 @@ All iterateables can be output by `ostrut` with the syntax `[1, 2, 3, ...]` you 
 - `std::set` is displayed like `{1, 2, 3, ...}`.
 - `std::multiset` is displayed like `{|1, 1, 2, 3, 3, ...|}`.
 - `std::multimap` is displayed like `{|1 : [2, 3, 4], 2 : [1], ...|}`.
+
 For convenience, also pairs and tuples are displayed:
 - `std::pair` is displayed like `(1, 2)`.
 - `std::tuple` is displayed like `(1, 2, 3, 4, 5)`.
+
 Also for convenience, pointers are dereferenced instead of displaying the raw memory address (supported are C-style pointers, `std::shared_ptr`, `std::unique_ptr`, `std::auto_ptr`, `std::weak_ptr`)
 
 
@@ -126,6 +128,11 @@ std::cout << cpx << std::endl
 Open Projects & Known Issues
 ----------------------------
 
+For a start, this document is rather scanty (left to be done is, e.g., explain opaque type display, preprocessor parametrizations, tutorial on how to pimp own container types, synopsis of the interface).
+In particular the list is far from being complete (:
+
+- Include unordered variants in this docu (they are already in the code...)
+
 - Specialization for `std::unordered_multimap`, see e.g. [here](http://en.cppreference.com/w/cpp/container).
 
 - Specialization for Boost-variants (smart pointers, maps, tuples, pairs, ...).  (Use forward declarations as for standard library to minimize compile time.)
@@ -141,9 +148,4 @@ Open Projects & Known Issues
 - Implement IO-manipulator to switch displaying memory addresses on/off, like `ostrut::display_pointer_addresses(bool)`, `ostrut::display_container_addresses(bool)`, and `ostrut::display_opaque_addresses(bool)` (only available if opaque type display is not disabled).  Also include a shortcut `ostrut::display_addresses(bool)` that is equivalent to setting all those addresses.
 
 - Doxygen docu of the user interface.
-
-
-- This document is a bit scanty (explain opaque type display, preprocessor parametrizations, tutorial on how to pimp own container types, synopsis of the interface).
-
-- In particular this list is far from being complete :)
 
