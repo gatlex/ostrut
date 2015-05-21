@@ -22,10 +22,26 @@
 #define OSTRUT_DEFAULT_NESTING_CANCELED_STRING std::string("..")
 #endif // ifndef OSTRUT_DEFAULT_NESTING_CANCELED_STRING
 
+#ifndef OSTRUT_DEFAULT_NULLPTR_STRING
+#define OSTRUT_DEFAULT_NULLPTR_STRING std::string("null")
+#endif // ifndef OSTRUT_DEFAULT_NULLPTR_STRING
+
+#ifndef OSTRUT_NO_OPAQUE_OUTPUT
+#include <typeinfo> // typeid
+#endif // ifndef OSTRUT_NO_OPAQUE_OUTPUT
 
 #ifndef OSTRUT_NO_SETTINGS_STACK
 #include <vector>
 #endif // ifndef OSTRUT_NO_SETTINGS_STACK
+
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+
+#ifndef OSTRUT_DEFAULT_RECURSION_ABORTION_STRING
+#define OSTRUT_DEFAULT_RECURSION_ABORTION_STRING std::string("@")
+#endif // ifndef OSTRUT_DEFAULT_RECURSION_ABORTION_STRING
+
+#include <vector>
+#endif // ifndef OSTRUT_NO_RECURSION_ABORTION
 
 
 // # Forward declarations
@@ -62,7 +78,8 @@ namespace std {
   template<typename t> class auto_ptr;
   template<typename t, typename deleter> class unique_ptr;
 
-  template<typename char_t, typename traits, typename allocator> class basic_string;
+  // #include <string>
+  //template<typename char_t, typename traits, typename allocator> class basic_string;
   
   // #include <utility>
   //template<typename t1, typename t2> struct pair;
@@ -80,12 +97,8 @@ namespace std {
 #include <type_traits> // std::is_pointer and the like
 #include <limits> // std::numeric_limits<size_t>::max()
 #include <locale> // std::locale, facets
+#include <string> // std::basic_string specialization std::string
 #include <tuple>  // std::get
-
-#ifndef OSTRUT_NO_OPAQUE_OUTPUT
-#include <typeinfo> // typeid
-#include <cxxabi.h> // TBD: How to include only when available?
-#endif // ifndef OSTRUT_NO_OPAQUE_OUTPUT
 
 #ifdef NDEBUG
 #define assert(x) ((void)0)
@@ -336,7 +349,12 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
 					        decltype(::ostrut::detail::introspect<decltype(*std::begin(c))>::repr(out, *std::begin(c)))>::type
   {
     auto &ostrut_state = ::ostrut::manip::detail::getimbue_state_facet(out);
-    auto expansion_counter = ostrut_state.expansion_limit();
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    if(ostrut_state.callstack_contains(&c))
+      return out << ostrut_state.recursion_abortion_string();
+    else
+      ostrut_state.callstack_push_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     
     out << "[";
     if(ostrut_state.current_nesting_depth >= ostrut_state.matryoshka_limit())
@@ -347,6 +365,7 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       auto i = std::begin(c);
       using value_t = typename std::remove_const<typename std::remove_reference<decltype(*i)>::type>::type;
       if(i != std::end(c)) {
+	auto expansion_counter = ostrut_state.expansion_limit();
 	if(expansion_counter <= 0)
 	  out << ostrut_state.expansion_canceled_string();
 	else {
@@ -365,6 +384,9 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       
       --ostrut_state.current_nesting_depth;
     }
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    ostrut_state.callstack_pop_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     return out << "]";
   }
 
@@ -378,7 +400,13 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
 					        decltype(out << (*std::begin(c)).second)>::type
   {
     auto &ostrut_state = ::ostrut::manip::detail::getimbue_state_facet(out);
-    auto expansion_counter = ostrut_state.expansion_limit();
+    
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    if(ostrut_state.callstack_contains(&c))
+      return out << ostrut_state.recursion_abortion_string();
+    else
+      ostrut_state.callstack_push_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     
     out << "{";
     if(ostrut_state.current_nesting_depth >= ostrut_state.matryoshka_limit())
@@ -391,6 +419,7 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       using value_t = typename std::remove_const<typename std::remove_reference<decltype((*i).second)>::type>::type;
       if(i != std::end(c)) {
 	const auto e = *i++;
+	auto expansion_counter = ostrut_state.expansion_limit();
 	if(expansion_counter <= 0)
 	  out << ostrut_state.expansion_canceled_string();
 	else {
@@ -410,6 +439,9 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       
       --ostrut_state.current_nesting_depth;
     }
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    ostrut_state.callstack_pop_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     return out << "}";
   }
 
@@ -422,7 +454,13 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
 					        decltype(out << *std::begin(c))>::type
   {
     auto &ostrut_state = ::ostrut::manip::detail::getimbue_state_facet(out);
-    auto expansion_counter = ostrut_state.expansion_limit();
+    
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    if(ostrut_state.callstack_contains(&c))
+      return out << ostrut_state.recursion_abortion_string();
+    else
+      ostrut_state.callstack_push_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     
     out << "{|";
     if(ostrut_state.current_nesting_depth >= ostrut_state.matryoshka_limit())
@@ -434,6 +472,7 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       using key_t = typename std::remove_const<typename std::remove_reference<decltype(*i)>::type>::type;
       if(i != std::end(c)) {
 	const auto e = *i++;
+	auto expansion_counter = ostrut_state.expansion_limit();
 	if(expansion_counter <= 0)
 	  out << ostrut_state.expansion_canceled_string();
 	else {
@@ -453,6 +492,9 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       
       --ostrut_state.current_nesting_depth;
     }
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    ostrut_state.callstack_pop_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     return out << "|}";
   }
   
@@ -466,7 +508,13 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
 					        decltype(out << std::begin(c)->second)>::type
   {
     auto &ostrut_state = ::ostrut::manip::detail::getimbue_state_facet(out);
-    auto expansion_counter = ostrut_state.expansion_limit();
+    
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    if(ostrut_state.callstack_contains(&c))
+      return out << ostrut_state.recursion_abortion_string();
+    else
+      ostrut_state.callstack_push_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     
     out << "{|";
     if(ostrut_state.current_nesting_depth >= ostrut_state.matryoshka_limit())
@@ -478,6 +526,7 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       using key_t = typename std::remove_const<typename std::remove_reference<decltype(j->first)>::type>::type;
       using val_t = typename std::remove_const<typename std::remove_reference<decltype(j->second)>::type>::type;
       if(j != std::end(c)) {
+	auto expansion_counter = ostrut_state.expansion_limit();
 	if(expansion_counter <= 0)
 	  out << ostrut_state.expansion_canceled_string();
 	else {
@@ -539,6 +588,9 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       
       --ostrut_state.current_nesting_depth;
     }
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    ostrut_state.callstack_pop_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     return out << "|}";
   }
   
@@ -551,7 +603,13 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
 					        decltype(out << *std::begin(c))>::type
   {
     auto &ostrut_state = ::ostrut::manip::detail::getimbue_state_facet(out);
-    auto expansion_counter = ostrut_state.expansion_limit();
+    
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    if(ostrut_state.callstack_contains(&c))
+      return out << ostrut_state.recursion_abortion_string();
+    else
+      ostrut_state.callstack_push_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     
     out << "{";
     if(ostrut_state.current_nesting_depth >= ostrut_state.matryoshka_limit())
@@ -562,6 +620,7 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       auto i = std::begin(c);
       using key_t = typename std::remove_const<typename std::remove_reference<decltype(*i)>::type>::type;
       if(i != std::end(c)) {
+	auto expansion_counter = ostrut_state.expansion_limit();
 	if(expansion_counter <= 0)
 	  out << ostrut_state.expansion_canceled_string();
 	else {
@@ -582,6 +641,9 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
       
       --ostrut_state.current_nesting_depth;
     }
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+    ostrut_state.callstack_pop_back(&c);
+#endif // ifdef OSTRUT_NO_RECURSION_ABORTION
     return out << "}";
   }
   
@@ -607,32 +669,37 @@ namespace std { // Inject operator<< into std so that the compiler finds it.
     using tuple_t = std::tuple<types...>;
     return ::ostrut::detail::introspect_tuple<std::tuple_size<tuple_t>::value>::repr(out << "(", tup) << ")";
   }
+
+  // Make ordinary pointers ostream-able
+  template<typename type, typename char_t, typename _traits>
+  auto operator<<(std::basic_ostream<char_t, _traits> &out, const type *p)
+    -> std::basic_ostream<char_t, _traits> & //decltype(out << *p)
+  {
+    if(p == nullptr) {
+      auto &ostrut_state = ::ostrut::manip::detail::getimbue_state_facet(out);
+      return out << ostrut_state.nullptr_string();
+    }
+    return out << *p;
+  }
   
   // Make smart pointers ostream-able
   template<typename type, typename char_t, typename _traits>
   auto operator<<(std::basic_ostream<char_t, _traits> &out, const type &p)
     -> typename std::enable_if<::ostrut::detail::is_smart_pointer<type>::value,
-			       decltype(out << *p)>::type
+                               decltype(out << p.get())>::type
   {
-    return out << *p;
+    // Just forward to ordinary pointer streaming above.
+    return out << p.get();
   }
 
   // Make weak pointers ostream-able
   template<typename type, typename char_t, typename _traits>
   auto operator<<(std::basic_ostream<char_t, _traits> &out, const type &p)
     -> typename std::enable_if<::ostrut::detail::is_weak_pointer<type>::value,
-			       decltype(out << *(p.lock()))>::type
+			       decltype(out << p.lock())>::type
   {
-    return out << *(p.lock());
-  }
-
-  // Make ordinary pointers ostream-able
-  template<typename type, typename char_t, typename _traits>
-  auto operator<<(std::basic_ostream<char_t, _traits> &out, const type &p)
-    -> typename std::enable_if<std::is_pointer<type>::value,
-			       decltype(out << *p)>::type
-  {
-    return out << *p;
+    // Just forward to shared ptr streaming above.
+    return out << p.lock();
   }
   
 } // namespace std
@@ -740,19 +807,23 @@ namespace ostrut {
 	detail::fixpoint_counter<size_t,std::numeric_limits<size_t>::max()> matryoshka_limit() const {
 	  return current_settings_.matryoshka_limit_;
 	}
+	
 	void set_matryoshka_limit(size_t n) {
 	  current_settings_.matryoshka_limit_ = n;
 	}
-	  void set_matryoshka_limit(infinite_t) {
+	
+	void set_matryoshka_limit(infinite_t) {
 	    current_settings_.matryoshka_limit_ = current_settings_.matryoshka_limit_.fixpoint();
 	}
 
 	detail::fixpoint_counter<size_t,std::numeric_limits<size_t>::max()> expansion_limit() const {
 	  return current_settings_.expansion_limit_;
 	}
+	
 	void set_expansion_limit(size_t n) {
 	  current_settings_.expansion_limit_ = n;
 	}
+	
 	void set_expansion_limit(infinite_t) {
 	  current_settings_.expansion_limit_ = current_settings_.expansion_limit_.fixpoint();
 	}
@@ -773,6 +844,14 @@ namespace ostrut {
 	  current_settings_.nesting_canceled_string_ = str;
 	}
 		
+	const std::string &nullptr_string() const {
+	  return current_settings_.nullptr_string_;
+	}
+
+	void set_nullptr_string(const std::string &str) {
+	  current_settings_.nullptr_string_ = str;
+	}
+		
 #ifndef OSTRUT_NO_SETTINGS_STACK
 	void push_settings() {
 	  settings_stack_.push_back(current_settings_);
@@ -785,6 +864,42 @@ namespace ostrut {
 	  settings_stack_.pop_back();
 	}
 #endif // ifndef OSTRUT_NO_SETTINGS_STACK
+
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+	const std::string &recursion_abortion_string() const {
+	  return current_settings_.recursion_abortion_string_;
+	}
+
+	void set_recursion_abortion_string(const std::string &str) {
+	  current_settings_.recursion_abortion_string_ = str;
+	}
+	
+	template <typename type>
+	bool callstack_contains(const type *c)
+	{
+	  // Do by foot, avoids to pull <algorithm>
+	  //std::find(std::begin(callstack_), std::end(callstack_), static_cast<const void *>(c));
+	  for(auto x: callstack_)
+	    if(x == static_cast<const void *>(c))
+	      return true;
+	  return false;
+	}
+	
+	template <typename type>
+	void callstack_push_back(const type *c)
+	{
+	  callstack_.push_back(static_cast<const void *>(c));
+	}
+	
+	// asserts that the popped address is c (if != nullptr).
+	template <typename type>
+	void callstack_pop_back(const type *c = nullptr)
+	{
+	  if(c != nullptr)
+	    assert(callstack_.back() == static_cast<const void *>(c));
+	  callstack_.pop_back();
+	}
+#endif // ifndef OSTRUT_NO_RECURSION_ABORTION
 	
       private:
 	struct settings_t {
@@ -792,7 +907,11 @@ namespace ostrut {
 	    : expansion_limit_(OSTRUT_DEFAULT_EXPANSION_LIMIT),
 	      matryoshka_limit_(OSTRUT_DEFAULT_NESTING_LIMIT),
 	      expansion_canceled_string_(OSTRUT_DEFAULT_EXPANSION_CANCELED_STRING),
-	      nesting_canceled_string_(OSTRUT_DEFAULT_NESTING_CANCELED_STRING)
+	      nesting_canceled_string_(OSTRUT_DEFAULT_NESTING_CANCELED_STRING),
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+	      recursion_abortion_string_(OSTRUT_DEFAULT_RECURSION_ABORTION_STRING),
+#endif // OSTRUT_NO_RECURSION_ABORTION
+	      nullptr_string_(OSTRUT_DEFAULT_NULLPTR_STRING)
 	  { }
 	  
 	  settings_t &operator=(const settings_t &o) = default;
@@ -801,11 +920,18 @@ namespace ostrut {
 	  detail::fixpoint_counter<size_t,std::numeric_limits<size_t>::max()> matryoshka_limit_;
 	  std::string expansion_canceled_string_;
 	  std::string nesting_canceled_string_;
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+	  std::string recursion_abortion_string_;
+#endif // OSTRUT_NO_RECURSION_ABORTION
+	  std::string nullptr_string_;
 	} current_settings_;
 #ifndef OSTRUT_NO_SETTINGS_STACK
 	std::vector<settings_t> settings_stack_;
 #endif // ifndef OSTRUT_NO_SETTINGS_STACK
-	
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+	std::vector<const void *> callstack_;
+#endif // OSTRUT_NO_RECURSION_ABORTION
+
       public:
 	size_t current_nesting_depth;
       };
@@ -828,6 +954,18 @@ namespace ostrut {
        
       struct nesting_unbounded_manipulator {
 	nesting_unbounded_manipulator(infinite_t) { }
+      };
+      
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+      struct recursion_abortion_string_manipulator {
+	recursion_abortion_string_manipulator(const std::string &rec_abor_string_) : recursion_abortion_string(rec_abor_string_) { }
+	std::string recursion_abortion_string;
+      };
+#endif // ifndef OSTRUT_NO_RECURSION_ABORTION
+      
+      struct nullptr_string_manipulator {
+	nullptr_string_manipulator(const std::string &nullptr_string_) : nullptr_string(nullptr_string_) { }
+	std::string nullptr_string;
       };
       
 #ifndef OSTRUT_NO_SETTINGS_STACK
@@ -898,6 +1036,18 @@ namespace ostrut {
     return nesting_limit(inf);
   }
   
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+  auto recursion_abortion_string(const std::string &rec_abort_str) -> manip::detail::recursion_abortion_string_manipulator
+  {
+    return manip::detail::recursion_abortion_string_manipulator(rec_abort_str);
+  }
+#endif // ifndef OSTRUT_NO_RECURSION_ABORTION
+  
+  auto nullptr_string(const std::string &nullptr_str) -> manip::detail::nullptr_string_manipulator
+  {
+    return manip::detail::nullptr_string_manipulator(nullptr_str);
+  }
+  
 #ifndef OSTRUT_NO_SETTINGS_STACK
   auto push_settings() -> manip::detail::push_settings_manipulator
   {
@@ -951,7 +1101,27 @@ namespace std {
     ostrut_state.set_matryoshka_limit(::ostrut::infinite);
     return out;
   }
-
+  
+#ifndef OSTRUT_NO_RECURSION_ABORTION
+  template<typename char_t, typename _traits>
+  auto operator<<(std::basic_ostream<char_t, _traits> &out, const ::ostrut::manip::detail::recursion_abortion_string_manipulator &manip)
+    -> std::basic_ostream<char_t, _traits> &
+  {
+    auto &ostrut_state = ::ostrut::manip::detail::getimbue_state_facet(out);
+    ostrut_state.set_recursion_abortion_string(manip.recursion_abortion_string);
+    return out;
+  }
+#endif // ifndef OSTRUT_NO_RECURSION_ABORTION
+  
+  template<typename char_t, typename _traits>
+  auto operator<<(std::basic_ostream<char_t, _traits> &out, const ::ostrut::manip::detail::nullptr_string_manipulator &manip)
+    -> std::basic_ostream<char_t, _traits> &
+  {
+    auto &ostrut_state = ::ostrut::manip::detail::getimbue_state_facet(out);
+    ostrut_state.set_nullptr_string(manip.nullptr_string);
+    return out;
+  }
+  
 #ifndef OSTRUT_NO_SETTINGS_STACK
   template<typename char_t, typename _traits>
   auto operator<<(std::basic_ostream<char_t, _traits> &out, const ::ostrut::manip::detail::push_settings_manipulator &)
