@@ -25,7 +25,7 @@ So, nesting a `std::pair` of a `std::vector<int>` and a `std::map<std::string,st
 std::cout << cpx << std::endl;
 // Outputs: [([1, 2, 3], {"Hello" : [42, 17], "World" : [21]}), ([4, 5, 6], {"Dlrow" : [12], "Olleh" : [24, 71]})]
 ```
-In this example, you can see that pairs are displayed by round parentheses, while maps are displayed in Python-manner using braces and colons like `{A : B, C : D}`.  For more on that see [below on special syntax for common containers](#special-syntax).  Also notice that strings are wrapped in double quotes; similarly, characters would be wrapped in single quotes.
+In this example, you can see that pairs are displayed by round parentheses, while maps are displayed in Python-manner using braces and colons like `{A : B, C : D}`.  For more on that see [below on special syntax for common containers](#special-syntax-for-various-standard-containers).  Also notice that strings are wrapped in double quotes; similarly, characters would be wrapped in single quotes.
 
 
 Usage
@@ -71,7 +71,7 @@ std::cout << m << std::endl;
 ```
 
 
-Special Syntax for Various Standard Containers<a name="special-syntax" />
+Special Syntax for Various Standard Containers
 ----------------------------------------------
 
 All iterateables can be output by `ostrut` with the syntax `[1, 2, 3, ...]` you already saw.  The only requirement is that the container implement the iterator interface (i.e., `std::begin(c)` and `std::end(c)` must be valid expressions for a const instance of the container,  yielding iterators).  Apart from this generic output, `ostrut` has some specializations for the most common standard library containers (for illustrations parametrized by integers):
@@ -90,7 +90,7 @@ Also for convenience, pointers are dereferenced instead of displaying the raw me
 Matryoshka Limit
 ----------------
 
-You already saw that `ostrut` can also handle nested containers.  For very deep structures, this might get confusing and a rought outline of the first few level might suffice.  This is where a nesting limit (aka matryoshka limit) enters the game (`cpx` being the complex nested data structure from the above example):
+You already saw that `ostrut` can handle nested containers.  For very deep structures, this might get confusing and a rough outline of the first few level might suffice.  This is where a nesting limit (aka matryoshka limit) enters the game (`cpx` being the complex nested data structure from the above example):
 ```c++
 std::cout << ostrut::nesting_limit(2) << cpx << std::endl;
 // Outputs: [([1, 2, 3], {"Hello" : [..], "World" : [..]}), ([4, 5, 6], {"Dlrow" : [..], "Olleh" : [..]})]
